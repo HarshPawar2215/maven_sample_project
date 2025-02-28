@@ -1,1 +1,34 @@
 
+<service>
+<id>jenkins</id>
+<name>Jenkins</name>
+<description>This service runs Jenkins automation server.</description>
+<env name="JENKINS_HOME" value="%ProgramData%\Jenkins\.jenkins"/>
+<!-- 
+    if you'd like to run Jenkins with a specific version of Java, specify a full path to java.exe.
+    The following value assumes that you have java in your PATH.
+   -->
+<executable>C:\Program Files\Java\jdk-21\\bin\java.exe</executable>
+<arguments>-Xrs -Xmx256m -Dhudson.lifecycle=hudson.lifecycle.WindowsServiceLifecycle -jar "C:\Program Files\Jenkins\jenkins.war" --httpPort=8080 --webroot="%ProgramData%\Jenkins\war"</arguments>
+<!-- 
+    interactive flag causes the empty black Java window to be displayed.
+    I'm still debugging this.
+  <interactive />
+   -->
+<logmode>rotate</logmode>
+<onfailure action="restart"/>
+<!--  
+    In the case WinSW gets terminated and leaks the process, we want to abort
+    these runaway JAR processes on startup to prevent corruption of JENKINS_HOME.
+    So this extension is enabled by default.
+   -->
+<extensions>
+<!--  This is a sample configuration for the RunawayProcessKiller extension.  -->
+<extension enabled="true" className="winsw.Plugins.RunawayProcessKiller.RunawayProcessKillerExtension" id="killOnStartup">
+<pidfile>%ProgramData%\Jenkins\jenkins.pid</pidfile>
+<stopTimeout>10000</stopTimeout>
+<stopParentFirst>false</stopParentFirst>
+</extension>
+</extensions>
+<!--  See the referenced examples for more options  -->
+</service>
